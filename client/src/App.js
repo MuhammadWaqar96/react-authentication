@@ -7,6 +7,7 @@ import axios from 'axios';
 
 import Login from './components/login/login';
 import Dashboard from './components/Dashboard/Dashboard';
+import RequestForm from './components/request-form/request-form';
 import { getToken, removeUserSession, setUserSession } from './Utils/Common';
 
 
@@ -42,6 +43,7 @@ function App() {
           </div>
           <div className='content'>
             <Switch>
+              <Route exact path="/" component={RequestForm} />
               <PublicRoute exact path="/login" component={Login} />
               <PrivateRoute exact path='/dashboard' component={Dashboard} />
             </Switch>

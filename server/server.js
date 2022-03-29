@@ -5,9 +5,20 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const utils = require('./utils');
+const sqlite3 = require("sqlite3").verbose();
+
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+// let db = new sqlite3.Database("./test.db");
+// let sql = "CREATE TABLE employee(id INTEGER PRIMARY KEY AUTOINCREMENT, requestDate text, joiningDate text, employeeId text, dob text, employeeName text, designation text, department text, property text, status text);"
+// db.run(sql);
+// db.close();
+//Connect to database
+const db = new sqlite3.Database("./test.db", sqlite3.OPEN_READWRITE, (err) => {
+  if (err) return console.log(err.message);
+});
 
 // static user details
 const userData = {
@@ -114,6 +125,49 @@ app.get('/verifyToken', function (req, res) {
     return res.json({ user: userObj, token });
   });
 });
+
+
+// create employee
+app.post("/create", (req, res) => {
+  console.log(req.body);
+const requestDate = req.body.requestDate;
+const joiningDate = req.body.joiningDate;
+const employeeId = req.body.employeeId;
+const dob = req.body.dob;
+const employeeName = req.body.employeeName;
+const designation = req.body.designation;
+const department = req.body.department;
+const property = req.body.property;
+const status = "Progress"
+
+let sql = `INSERT INTO employee
+(requestDate, joiningDate, employeeId, dob, employeeName, designation, department, property, status)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?,?);`;
+
+db.run(
+  sql,
+  [
+    requestDate,
+    joiningDate,
+    employeeId,
+    dob,
+    employeeName,
+    designation,
+    department,
+    property,
+    status
+  ],
+  (err, result) =>  {
+    if (err) {
+      return console.error(err.message);
+    }
+  }
+);
+
+return res.status(200).send("success")
+
+});
+
 
 app.listen(port, () => {
   console.log('Server started on: ' + port);
