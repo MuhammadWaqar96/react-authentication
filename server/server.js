@@ -11,14 +11,15 @@ const sqlite3 = require("sqlite3").verbose();
 const app = express();
 const port = process.env.PORT || 3001;
 
-// let db = new sqlite3.Database("./test.db");
+let db = new sqlite3.Database("./test.db");
 // let sql = "CREATE TABLE employee(id INTEGER PRIMARY KEY AUTOINCREMENT, requestDate text, joiningDate text, employeeId text, dob text, employeeName text, designation text, department text, property text, status text);"
 // db.run(sql);
 // db.close();
 //Connect to database
-const db = new sqlite3.Database("./test.db", sqlite3.OPEN_READWRITE, (err) => {
-  if (err) return console.log(err.message);
-});
+// const db = new sqlite3.Database("./test.db", sqlite3.OPEN_READWRITE, (err) => {
+//   if (err) return console.log(err.message);
+// });
+
 
 // static user details
 const userData = {
@@ -28,6 +29,17 @@ const userData = {
   username: "cluemediator",
   isAdmin: true
 };
+
+app.get("/employees", (req, res) => {
+  db.all("SELECT * FROM employee;", (err, result) => {
+      if(err) {
+          console.log(err);
+      }
+      else{
+          res.status(200).send(result);
+      }
+  })
+});
 
 // enable CORS
 app.use(cors());
@@ -80,19 +92,35 @@ app.post('/users/signin', function (req, res) {
   }
 
   // return 401 status if the credential is not match.
-  if (user !== userData.username || pwd !== userData.password) {
-    return res.status(401).json({
-      error: true,
-      message: "Username or Password is Wrong."
-    });
-  }
+  // if (user !== userData.username || pwd !== userData.password) {
+  //   return res.status(401).json({
+  //     error: true,
+  //     message: "Username or Password is Wrong."
+  //   });
+  // }
+
+  let sql = 'SELECT * FROM login WHERE username = ?;';
+  db.get(sql, user, (err, result) => {
+    if(err){
+      return res.status(401).json({
+            error: true,
+            message: err
+          });
+      }
+      else{
+        const token = utils.generateToken(result);
+        const userObj = utils.getCleanUser(result);
+        return res.json({ user: userObj, token });
+        // return res.status(200).json({auth: true, result: result});
+      }
+  });
 
   // generate token
-  const token = utils.generateToken(userData);
+  // const token = utils.generateToken(userData);
   // get basic user details
-  const userObj = utils.getCleanUser(userData);
+  // const userObj = utils.getCleanUser(userData);
   // return the token along with user details
-  return res.json({ user: userObj, token });
+  // return res.json({ user: userObj, token });
 });
 
 
