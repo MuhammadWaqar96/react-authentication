@@ -38,6 +38,16 @@ app.get("/employees", (req, res) => {
   });
 });
 
+app.get("/progress-employees", (req, res) => {
+  db.all("SELECT * FROM employee where status = 'Progress';", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.status(200).send(result);
+    }
+  });
+});
+
 // enable CORS
 app.use(cors());
 // parse application/json
